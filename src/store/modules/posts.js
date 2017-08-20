@@ -16,10 +16,18 @@ const getters = {
 
 const mutations = {
     [types.SET_POSTS](state, posts) {
-        state.posts = _.mapKeys(posts, 'permalink');
+        state.posts = _.mapKeys(posts, (value, key) => { 
+            value._id = key;
+            return  value.permalink;
+        });
     },
-    [types.ADD_POST](state, { permalink, title, content }) {
-        state.posts = { ...state.posts, [permalink]: { title, content } };
+    [types.ADD_POST](state, post) {
+        const newPost = _.mapKeys(post, (value, key) => { 
+            value._id = key;
+            return  value.permalink;
+        });
+
+        state.posts = { ...state.posts, ...newPost };
     }
 };
 
@@ -33,7 +41,7 @@ const actions = {
     [types.FETCH_POST]({ commit }, permalink) {
         Vue.http.get(`${ endpoint }?orderBy="permalink"&equalTo="${ permalink }"`)
             .then(({ data }) => {
-                commit(types.ADD_POST, data[Object.keys(data)[0]]);
+                commit(types.ADD_POST, data);
             });
     },
     [types.CREATE_POST]({ commit }, post) {
