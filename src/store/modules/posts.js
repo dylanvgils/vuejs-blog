@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import Vue from 'vue';
+import firebase from 'firebase';
 
 import * as types from '../types';
 
@@ -33,22 +34,42 @@ const mutations = {
 
 const actions = {
     [types.FETCH_POSTS]({ commit }) {
-        Vue.http.get(endpoint)
-            .then(({ data }) => {
-                commit(types.SET_POSTS, data);
-            });
+        firebase.database().ref('/posts').once('value').then(snapshot => {
+            commit(types.SET_POSTS, snapshot.val());
+        });
+
+        // Vue.http.get(endpoint)
+        //     .then(({ data }) => {
+        //         commit(types.SET_POSTS, data);
+        //     });
     },
     [types.FETCH_POST]({ commit }, permalink) {
-        Vue.http.get(`${ endpoint }?orderBy="permalink"&equalTo="${ permalink }"`)
-            .then(({ data }) => {
-                commit(types.ADD_POST, data);
-            });
+        firebase.database()
+            .ref('/posts')
+            .orderByChild('permalink')
+            .equalTo(permalink)
+            .once('value')
+            .then(snapshot => {
+                commit(types.ADD_POST, snapshot.val());
+        });
+
+        // Vue.http.get(`${ endpoint }?orderBy="permalink"&equalTo="${ permalink }"`)
+        //     .then(({ data }) => {
+        //         commit(types.ADD_POST, data);
+        //     });
     },
-    [types.CREATE_POST]({ commit }, post) {
-        Vue.http.post(endpoint, post)
-            .then(({ data }) => {
-                commit(types.ADD_POST, post);
+    [types.CREATE_POST]({ commit, state }, post) {
+        firebase.database()
+            .ref('/posts')
+            .push(post)
+            .once('value', snapshot => {
+                commit(types.ADD_POST, {[snapshot.key]: snapshot.val()})
             });
+
+        // Vue.http.post(endpoint, post)
+        //     .then(({ data }) => {
+        //         commit(types.ADD_POST, post);
+        //     });
     }
 };
 
