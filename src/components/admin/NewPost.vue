@@ -18,6 +18,8 @@
                             class="form-control" 
                             type="text" 
                             placeholder="Permalink"
+                            :class="{danger: validation.permalink}"
+                            @blur="checkPermalink"
                             v-model="post.permalink">
                     </div>
                 </div>
@@ -38,6 +40,8 @@
 </template>
 
 <script>
+    import firebase from 'firebase';
+
     import { CREATE_POST } from '../../store/types';
 
     export default {
@@ -47,6 +51,9 @@
                     title: '',
                     permalink: '',
                     content: ''
+                },
+                validation: {
+                    permalink: false
                 }
             };
         },
@@ -54,11 +61,20 @@
             onSubmit() {
                 this.$store.dispatch(CREATE_POST, this.post);
                 this.$router.push('/');
+            },
+            checkPermalink() {
+                firebase.database()
+                    .ref('/posts')
+                    .orderByChild('permalink')
+                    .equalTo(this.post.permalink)
+                    .once('value', snapshot => {
+                        if (snapshot.val()) this.validation.permalink = true;
+                        else this.validation.permalink = false;
+                    });
             }
         }
     }
 </script>
 
 <style>
-
 </style>

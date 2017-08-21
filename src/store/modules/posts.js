@@ -34,9 +34,11 @@ const mutations = {
 
 const actions = {
     [types.FETCH_POSTS]({ commit }) {
-        firebase.database().ref('/posts').once('value').then(snapshot => {
-            commit(types.SET_POSTS, snapshot.val());
-        });
+        firebase.database()
+            .ref('/posts')
+            .once('value', snapshot => {
+                commit(types.SET_POSTS, snapshot.val());
+            });
 
         // Vue.http.get(endpoint)
         //     .then(({ data }) => {
@@ -48,8 +50,7 @@ const actions = {
             .ref('/posts')
             .orderByChild('permalink')
             .equalTo(permalink)
-            .once('value')
-            .then(snapshot => {
+            .once('value', snapshot => {
                 commit(types.ADD_POST, snapshot.val());
         });
 
@@ -61,7 +62,10 @@ const actions = {
     [types.CREATE_POST]({ commit, state }, post) {
         firebase.database()
             .ref('/posts')
-            .push(post)
+            .push({
+                ...post,
+                date: new Date().getTime()
+            })
             .once('value', snapshot => {
                 commit(types.ADD_POST, {[snapshot.key]: snapshot.val()})
             });

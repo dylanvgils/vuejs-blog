@@ -1,0 +1,7 @@
+.navbar + .container {
+    padding-top: 30px;
+}
+
+.danger {
+    border: 1px solid red;
+}

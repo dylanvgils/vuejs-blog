@@ -37,7 +37,6 @@
         },
         computed: {
             uid() {
-                console.log('test');
                 return this.$store.getters[GET_USER];
             }
         },
