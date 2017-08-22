@@ -2,7 +2,7 @@ import firebase from 'firebase';
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 
-import { SET_USER } from './store/types';
+import { INIT_USER } from './store/types';
 
 import AxiosPlugin from './plugins/axios';
 import store from './store';
@@ -28,8 +28,8 @@ const unsubscribe = firebase.initializeApp({
     databaseURL: 'https://vuejs-blog-fb7d1.firebaseio.com/',
     storageBucket: ''
 }).auth().onAuthStateChanged(user => {
-    if (user) store.commit(SET_USER, user.uid);
-    else if (user) store.commit(SET_USER, null);
+    if (user) store.dispatch(INIT_USER, user.uid);
+    else store.dispatch(INIT_USER, null);
     
     new Vue({
         el: '#app',

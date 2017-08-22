@@ -17,6 +17,9 @@ const mutations = {
 };
 
 const actions = {
+    [types.INIT_USER]({ commit }, uid) {
+        commit(types.SET_USER, uid);
+    },
     [types.SIGN_IN]({ commit }, payload) {
         firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
             .then(user => {

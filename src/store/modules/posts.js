@@ -4,7 +4,7 @@ import firebase from 'firebase';
 
 import * as types from '../types';
 
-const endpoint = 'posts.json';
+const ref = 'posts/';
 
 const state = {
     posts: {}
@@ -29,13 +29,16 @@ const mutations = {
         });
 
         state.posts = { ...state.posts, ...newPost };
+    },
+    [types.DELETE_POST](state, id) {
+        state.posts = _.pickBy(state.posts, post => post._id != id);
     }
 };
 
 const actions = {
     [types.FETCH_POSTS]({ commit }) {
         firebase.database()
-            .ref('/posts')
+            .ref(ref)
             .once('value', snapshot => {
                 commit(types.SET_POSTS, snapshot.val());
             });
@@ -47,7 +50,7 @@ const actions = {
     },
     [types.FETCH_POST]({ commit }, permalink) {
         firebase.database()
-            .ref('/posts')
+            .ref(ref)
             .orderByChild('permalink')
             .equalTo(permalink)
             .once('value', snapshot => {
@@ -61,7 +64,7 @@ const actions = {
     },
     [types.CREATE_POST]({ commit, state }, post) {
         firebase.database()
-            .ref('/posts')
+            .ref(ref)
             .push({
                 ...post,
                 date: new Date().getTime()
@@ -74,6 +77,14 @@ const actions = {
         //     .then(({ data }) => {
         //         commit(types.ADD_POST, post);
         //     });
+    },
+    [types.DELETE_POST]({ commit }, id) {
+        firebase.database()
+            .ref(ref.concat(id))
+            .remove()
+            .then(() => {
+                commit(types.DELETE_POST, id);
+            });
     }
 };
 
